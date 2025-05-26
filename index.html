@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Gambar Pixel Art AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #3D405B; /* Dark Slate Blue - Neutral Pixel Art Background */
+            color: #F4F1DE; /* Eggshell White - Text Color */
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .container {
+            max-width: 700px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #54587A; /* Darker Slate Blue - Container Background */
+            border: 3px solid #E07A5F; /* Terracotta - Accent Border */
+        }
+        #promptInput {
+            border: 3px solid #E07A5F; /* Terracotta border */
+            background-color: #F4F1DE; /* Eggshell White input background */
+            color: #3D405B; /* Dark Slate Blue text in input */
+            padding: 10px;
+            line-height: 1.5;
+            font-size: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .action-button, .aspect-button {
+            border: 3px solid #81B29A; /* Medium Aquamarine - Button Border */
+            padding: 10px 12px;
+            text-transform: uppercase;
+            transition: background-color 0.1s step-end, color 0.1s step-end;
+            font-size: 9px;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #F4F1DE; /* Eggshell White text for buttons */
+            background-color: #E07A5F; /* Terracotta button background */
+        }
+        .action-button:hover, .aspect-button:hover {
+            background-color: #D46A4D; /* Darker Terracotta on hover */
+            color: #FFFFFF; 
+        }
+        .action-button:disabled, .aspect-button:disabled {
+            background-color: #A9A9A9; /* DarkGray when disabled */
+            color: #696969; /* DimGray - Disabled text */
+            border-color: #808080; /* Gray border */
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        #downloadButton {
+            background-color: #3CB371; /* MediumSeaGreen */
+            border-color: #2E8B57; /* SeaGreen */
+        }
+        #downloadButton:hover {
+            background-color: #2E8B57; /* SeaGreen */
+        }
+        #suggestPaletteButton {
+            background-color: #FFD700; /* Gold */
+            border-color: #DAA520; /* Goldenrod */
+            color: #3D405B;
+        }
+        #suggestPaletteButton:hover {
+            background-color: #DAA520;
+            color: #FFFFFF;
+        }
+         #describeImageButton {
+            background-color: #6A5ACD; /* SlateBlue */
+            border-color: #483D8B; /* DarkSlateBlue */
+        }
+        #describeImageButton:hover {
+            background-color: #483D8B;
+        }
+        #createBackstoryButton {
+            background-color: #FF69B4; /* HotPink */
+            border-color: #C71585; /* MediumVioletRed */
+        }
+        #createBackstoryButton:hover {
+            background-color: #C71585;
+        }
+        .aspect-button {
+            background-color: #F2CC8F; /* Pale Gold */
+            border-color: #E0AF60; /* Darker Pale Gold */
+            color: #3D405B; /* Dark Slate Blue text for contrast */
+        }
+        .aspect-button:hover {
+             background-color: #E0AF60;
+             color: #FFFFFF;
+        }
+        #loadingIndicator, #enhancerLoadingIndicator, #variationLoadingIndicator, #paletteLoadingIndicator, #descriptionLoadingIndicator, #backstoryLoadingIndicator {
+            border-right-color: transparent;
+            border-left-color: transparent;
+            width: 28px;
+            height: 28px;
+            border-width: 3px;
+            border-top-color: #81B29A; /* Medium Aquamarine spinner */
+            border-bottom-color: #81B29A;
+        }
+         #paletteLoadingIndicator {
+            border-top-color: #FFD700;
+            border-bottom-color: #FFD700;
+        }
+        #descriptionLoadingIndicator {
+            border-top-color: #6A5ACD; /* SlateBlue spinner */
+            border-bottom-color: #6A5ACD;
+        }
+        #backstoryLoadingIndicator {
+            border-top-color: #FF69B4; /* HotPink spinner */
+            border-bottom-color: #FF69B4;
+        }
+        #generatedImageContainer {
+            border: 3px solid #E07A5F; /* Terracotta border */
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #6B7093; /* Lighter Slate Blue for image area */
+            margin-top: 15px;
+        }
+        #generatedImage {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        .error-message, .info-message {
+            padding: 10px;
+            border: 3px solid #E07A5F; /* Terracotta border */
+            margin-top: 10px;
+            text-transform: uppercase;
+            color: #F4F1DE; /* Eggshell text */
+        }
+        .error-message { background-color: #F28482; } /* Light Coral/Red for error */
+        .info-message { background-color: #81B29A; } /* Medium Aquamarine for info */
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); /* Adjusted for more buttons */
+            gap: 4px; /* Slightly reduced gap */
+            margin-top: 10px;
+        }
+        .aspect-button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .aspect-button-group label {
+            margin-bottom: 0 !important;
+            margin-right: 5px;
+            align-self: center;
+        }
+        .rounded-lg, .rounded-xl, .shadow-sm, .shadow-2xl, .shadow-md {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        label {
+            text-transform: uppercase;
+            margin-bottom: 5px !important;
+            display: block;
+        }
+        header h1 {
+            font-size: 16px;
+            text-transform: uppercase;
+            color: #F2CC8F; /* Pale Gold for main title */
+        }
+        header p {
+            font-size: 10px;
+        }
+        .loading-text {
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        #variationSuggestionsContainer, #paletteSuggestionsContainer, #imageDescriptionContainer, #backstoryContainer {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #5E6385; /* Slightly lighter container color */
+            border: 3px solid #81B29A; /* Medium Aquamarine border */
+            display: none;
+        }
+        #variationSuggestionsContainer h3, #paletteSuggestionsContainer h3, #imageDescriptionContainer h3, #backstoryContainer h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: #F2CC8F; /* Pale Gold title */
+        }
+        #variationSuggestionsList {
+            list-style-type: none;
+            padding-left: 0;
+            font-size: 10px;
+        }
+        #variationSuggestionsList li {
+            margin-bottom: 5px;
+            cursor: pointer;
+            padding: 3px;
+            border: 1px dashed #B2D0C1; /* Lighter Aquamarine border for list items */
+            color: #F4F1DE;
+        }
+        #variationSuggestionsList li:hover {
+            background-color: #6B7093; 
+            border-color: #F2CC8F;
+        }
+        #colorPaletteList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-left: 0;
+        }
+        .color-swatch-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 5px;
+            border: 1px dashed #B2D0C1;
+            cursor: pointer;
+        }
+        .color-swatch-item:hover {
+            border-color: #F2CC8F;
+            background-color: #6B7093;
+        }
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #F4F1DE;
+        }
+        #imageDescriptionText, #backstoryText {
+            font-size: 10px;
+            line-height: 1.6;
+            color: #F4F1DE;
+        }
+    </style>
+</head>
+<body>
+    <div class="container w-full">
+        <header class="text-center mb-4">
+            <h1>Generator Gambar Pixel Art</h1>
+            <p class="mt-1">Buat aset pixel art 2D atau gambar lainnya!</p>
+        </header>
+
+        <div class="mb-3">
+            <label for="promptInput">Masukkan Prompt Anda:</label>
+            <textarea id="promptInput" rows="4" class="w-full" placeholder="cth: pemandangan kastil, gaya fantasi, pixel art"></textarea>
+        </div>
+
+        <div class="aspect-button-group">
+            <label>Saran Komposisi:</label>
+            <button id="suggestLandscape" class="aspect-button">Lanskap</button>
+            <button id="suggestPortrait" class="aspect-button">Potret</button>
+        </div>
+
+        <div class="button-grid mb-4">
+            <button id="enhancePromptButton" class="action-button">
+                Tingkatkan Prompt
+            </button>
+            <button id="generateButton" class="action-button">
+                Buat Gambar
+            </button>
+            <button id="suggestVariationsButton" class="action-button">
+                Ide Variasi Aset
+            </button>
+             <button id="suggestPaletteButton" class="action-button">
+                ✨ Saran Palet Warna
+            </button>
+            <button id="describeImageButton" class="action-button" disabled>
+                ✨ Deskripsikan Gambar
+            </button>
+            <button id="createBackstoryButton" class="action-button" disabled>
+                ✨ Ciptakan Latar Cerita
+            </button>
+            <button id="downloadButton" class="action-button" disabled>
+                Unduh Gambar
+            </button>
+        </div>
+        
+        <div id="enhancerLoadingContainer" class="text-center my-2" style="display: none;">
+            <div id="enhancerLoadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-1 loading-text">Meningkatkan Prompt...</p>
+        </div>
+
+        <div id="variationLoadingContainer" class="text-center my-2" style="display: none;">
+            <div id="variationLoadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-1 loading-text">Mencari Ide Variasi...</p>
+        </div>
+         <div id="paletteLoadingContainer" class="text-center my-2" style="display: none;">
+            <div id="paletteLoadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-1 loading-text">Menyarankan Palet Warna...</p>
+        </div>
+        <div id="descriptionLoadingContainer" class="text-center my-2" style="display: none;">
+            <div id="descriptionLoadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-1 loading-text">Membuat Deskripsi Gambar...</p>
+        </div>
+        <div id="backstoryLoadingContainer" class="text-center my-2" style="display: none;">
+            <div id="backstoryLoadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-1 loading-text">Menciptakan Latar Cerita...</p>
+        </div>
+
+        <div id="loadingContainer" class="text-center my-3" style="display: none;">
+            <div id="loadingIndicator" class="animate-spin mx-auto"></div>
+            <p class="mt-2 loading-text">Menghasilkan Gambar... Harap Tunggu...</p>
+        </div>
+
+        <div id="errorContainer" class="my-3" style="display: none;">
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+        
+        <div id="infoContainer" class="my-3" style="display: none;">
+            <div id="infoMessage" class="info-message"></div>
+        </div>
+
+        <div id="variationSuggestionsContainer">
+            <h3>Ide Variasi Untuk Prompt Anda:</h3>
+            <ul id="variationSuggestionsList"></ul>
+        </div>
+
+        <div id="paletteSuggestionsContainer">
+            <h3>✨ Saran Palet Warna Untuk Tema Anda:</h3>
+            <ul id="colorPaletteList"></ul>
+            <p class="text-xs mt-2" style="color: #B2D0C1;">Klik kode warna untuk menyalin.</p>
+        </div>
+
+        <div id="imageDescriptionContainer">
+            <h3>✨ Deskripsi Gambar Ini:</h3>
+            <p id="imageDescriptionText"></p>
+        </div>
+        
+        <div id="backstoryContainer">
+            <h3>✨ Latar Cerita Singkat:</h3>
+            <p id="backstoryText"></p>
+        </div>
+
+        <div id="generatedImageContainer" class="p-2">
+            <img id="generatedImage" src="https://placehold.co/600x400/6B7093/F4F1DE?text=Hasil+Gambar+Anda&font=pressstart2p" alt="Hasil Gambar">
+        </div>
+         <p class="text-xs text-gray-400 text-center mt-3" style="color: #B2D0C1;">Catatan: Pembuatan gambar mungkin memerlukan beberapa saat.</p>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const generateButton = document.getElementById('generateButton');
+        const enhancePromptButton = document.getElementById('enhancePromptButton');
+        const suggestVariationsButton = document.getElementById('suggestVariationsButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const suggestLandscapeButton = document.getElementById('suggestLandscape');
+        const suggestPortraitButton = document.getElementById('suggestPortrait');
+        const suggestPaletteButton = document.getElementById('suggestPaletteButton');
+        const describeImageButton = document.getElementById('describeImageButton');
+        const createBackstoryButton = document.getElementById('createBackstoryButton');
+        
+        const loadingContainer = document.getElementById('loadingContainer');
+        const enhancerLoadingContainer = document.getElementById('enhancerLoadingContainer');
+        const variationLoadingContainer = document.getElementById('variationLoadingContainer');
+        const paletteLoadingContainer = document.getElementById('paletteLoadingContainer');
+        const descriptionLoadingContainer = document.getElementById('descriptionLoadingContainer');
+        const backstoryLoadingContainer = document.getElementById('backstoryLoadingContainer');
+        
+        const generatedImage = document.getElementById('generatedImage');
+        const generatedImageContainer = document.getElementById('generatedImageContainer');
+        
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const infoContainer = document.getElementById('infoContainer');
+        const infoMessage = document.getElementById('infoMessage');
+
+        const variationSuggestionsContainer = document.getElementById('variationSuggestionsContainer');
+        const variationSuggestionsList = document.getElementById('variationSuggestionsList');
+        const paletteSuggestionsContainer = document.getElementById('paletteSuggestionsContainer');
+        const colorPaletteList = document.getElementById('colorPaletteList');
+        const imageDescriptionContainer = document.getElementById('imageDescriptionContainer');
+        const imageDescriptionText = document.getElementById('imageDescriptionText');
+        const backstoryContainer = document.getElementById('backstoryContainer');
+        const backstoryText = document.getElementById('backstoryText');
+
+        let lastSuccessfulPrompt = ""; 
+
+
+        promptInput.value = "Sebuah hutan ajaib di malam hari, dengan jamur bercahaya dan kunang-kunang, detailed pixel art.";
+
+        const pixelArtKeywords = ["pixel art", "pixelart", "2d asset", "sprite", "8-bit", "8bit", "16-bit", "16bit", "pixelated", "retro game", "aset game 2d", "aset 2d"];
+
+        function isPixelArtPrompt(text) {
+            const lowerText = text.toLowerCase();
+            return pixelArtKeywords.some(keyword => lowerText.includes(keyword));
+        }
+
+        function disableButtons(disabled) {
+            const buttonsToToggle = [
+                enhancePromptButton, generateButton, suggestVariationsButton, 
+                suggestLandscapeButton, suggestPortraitButton, suggestPaletteButton, 
+                describeImageButton, createBackstoryButton
+            ];
+            buttonsToToggle.forEach(button => {
+                button.disabled = disabled;
+                if (disabled) button.classList.add('opacity-70'); 
+                else button.classList.remove('opacity-70');
+            });
+            if (disabled) { 
+                 downloadButton.disabled = true;
+                 downloadButton.classList.add('opacity-70');
+            }
+        }
+
+        function displayError(message) {
+            errorMessage.textContent = `ERROR: ${message}`; 
+            errorContainer.style.display = 'block';
+            infoContainer.style.display = 'none'; 
+            downloadButton.disabled = true; 
+            downloadButton.classList.add('opacity-70');
+            describeImageButton.disabled = true;
+            describeImageButton.classList.add('opacity-70');
+            createBackstoryButton.disabled = true;
+            createBackstoryButton.classList.add('opacity-70');
+        }
+
+        function displayInfo(message) {
+            infoMessage.textContent = `INFO: ${message}`; 
+            infoContainer.style.display = 'block';
+            errorContainer.style.display = 'none'; 
+        }
+
+        function hideMessagesAndSuggestionContainers() {
+            errorContainer.style.display = 'none';
+            infoContainer.style.display = 'none';
+            errorMessage.textContent = '';
+            infoMessage.textContent = '';
+            variationSuggestionsContainer.style.display = 'none';
+            paletteSuggestionsContainer.style.display = 'none';
+            imageDescriptionContainer.style.display = 'none';
+            backstoryContainer.style.display = 'none';
+        }
+        
+        suggestLandscapeButton.addEventListener('click', () => {
+            const currentPrompt = promptInput.value.trim();
+            const landscapePhrase = ", wide landscape view, cinematic aspect ratio";
+            if (currentPrompt && !currentPrompt.toLowerCase().includes("landscape") && !currentPrompt.toLowerCase().includes("wide shot")) {
+                promptInput.value = currentPrompt + landscapePhrase;
+            } else if (!currentPrompt) {
+                promptInput.value = "A beautiful scene" + landscapePhrase;
+            } else {
+                 displayInfo("Prompt Anda mungkin sudah mengarah ke lanskap.");
+            }
+        });
+
+        suggestPortraitButton.addEventListener('click', () => {
+            const currentPrompt = promptInput.value.trim();
+            const portraitPhrase = ", tall portrait view, vertical aspect ratio";
+            if (currentPrompt && !currentPrompt.toLowerCase().includes("portrait") && !currentPrompt.toLowerCase().includes("vertical")) {
+                promptInput.value = currentPrompt + portraitPhrase;
+            } else if (!currentPrompt) {
+                promptInput.value = "A character design" + portraitPhrase;
+            } else {
+                displayInfo("Prompt Anda mungkin sudah mengarah ke potret.");
+            }
+        });
+
+
+        async function handleApiResponseError(response, functionPrefix = "") {
+            let errorDetail = `(${response.status} ${response.statusText || 'Status tidak diketahui'})`;
+            let apiDetailMessage = "Tidak ada detail tambahan dari server."; 
+            let rawErrorForConsole = "Gagal membaca respons error mentah dari server.";
+
+            try {
+                const errorContent = await response.text().catch(() => ""); 
+                rawErrorForConsole = errorContent; 
+                console.log(`RAW_API_ERROR_CONTENT for ${functionPrefix.trim()}:`, rawErrorForConsole); 
+
+                if (errorContent === null || typeof errorContent === 'undefined') {
+                     apiDetailMessage = "Respons error dari server adalah null atau undefined.";
+                } else if (errorContent.trim() === "") {
+                    apiDetailMessage = "Respons error dari server kosong.";
+                } else {
+                    apiDetailMessage = errorContent.substring(0, 250) + (errorContent.length > 250 ? "..." : ""); 
+                    try {
+                        const errorData = JSON.parse(errorContent); 
+                        if (errorData && errorData.error && errorData.error.message) {
+                            apiDetailMessage = errorData.error.message;
+                        } else if (errorData && errorData.message) {
+                            apiDetailMessage = errorData.message;
+                        } else if (typeof errorData === 'object' && errorData !== null) {
+                            const stringifiedJson = JSON.stringify(errorData);
+                            if (stringifiedJson !== '{}' && stringifiedJson.trim() !== "") { 
+                                apiDetailMessage = stringifiedJson.substring(0, 250) + (stringifiedJson.length > 250 ? "..." : "");
+                            }
+                        }
+                    } catch (parseError) {
+                        console.warn(`FAIL_PARSE_JSON_ERROR_RESPONSE for ${functionPrefix.trim()}. Using raw text. Detail: ${parseError.message}`);
+                    }
+                }
+            } catch (readError) {
+                console.error(`FAIL_READ_ERROR_RESPONSE for ${functionPrefix.trim()}:`, readError);
+                apiDetailMessage = "Gagal membaca detail error dari server.";
+            }
+
+            let userMessage;
+            if (response.status === 401) {
+                userMessage = `Error ${response.status}: Akses Ditolak. Kemungkinan masalah dengan Kunci API atau otorisasi. Detail Server: ${apiDetailMessage}`;
+            } else if (response.status === 403) {
+                userMessage = `Error ${response.status}: Akses Dilarang. Anda mungkin tidak memiliki izin. Detail Server: ${apiDetailMessage}`;
+            } else {
+                userMessage = `Error ${errorDetail}: ${apiDetailMessage}`;
+            }
+            throw new Error(functionPrefix + userMessage);
+        }
+
+
+        enhancePromptButton.addEventListener('click', async () => {
+            const currentPrompt = promptInput.value.trim();
+            if (!currentPrompt) {
+                displayError("Prompt kosong. Silakan masukkan prompt untuk ditingkatkan.");
+                return;
+            }
+
+            hideMessagesAndSuggestionContainers();
+            enhancerLoadingContainer.style.display = 'block';
+            disableButtons(true);
+
+            let enhancementInstruction = `Enhance this image generation prompt to be more vivid, detailed, and imaginative. Return only the enhanced prompt: "${currentPrompt}"`;
+            if (isPixelArtPrompt(currentPrompt)) {
+                enhancementInstruction = `Enhance this image generation prompt for a high-quality, clean, and crisp 2D pixel art style. Focus on details suitable for game assets or general pixel art illustration, ensuring sharp pixels and no blurriness. Return only the enhanced prompt: "${currentPrompt}"`;
+            }
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: enhancementInstruction }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    await handleApiResponseError(response, "Peningkatan prompt gagal. ");
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    promptInput.value = result.candidates[0].content.parts[0].text.trim();
+                    displayInfo("Prompt berhasil ditingkatkan!");
+                } else {
+                    throw new Error("Peningkatan prompt gagal. Respons server tidak sesuai harapan.");
+                }
+            } catch (error) {
+                console.error('Error enhancing prompt:', error);
+                displayError(error.message || `Terjadi kesalahan saat meningkatkan prompt.`);
+            } finally {
+                enhancerLoadingContainer.style.display = 'none';
+                disableButtons(false);
+                if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                } else {
+                    downloadButton.disabled = true; downloadButton.classList.add('opacity-70');
+                    describeImageButton.disabled = true; describeImageButton.classList.add('opacity-70');
+                    createBackstoryButton.disabled = true; createBackstoryButton.classList.add('opacity-70');
+                }
+            }
+        });
+
+        suggestVariationsButton.addEventListener('click', async () => {
+            const currentPrompt = promptInput.value.trim();
+            if (!currentPrompt) {
+                displayError("Prompt awal kosong. Masukkan prompt untuk mendapatkan ide variasi.");
+                return;
+            }
+
+            hideMessagesAndSuggestionContainers();
+            variationLoadingContainer.style.display = 'block';
+            disableButtons(true);
+
+            let variationInstruction = `Berikan 3 sampai 5 ide variasi untuk aset game atau ilustrasi berdasarkan prompt berikut. Setiap ide harus berupa prompt baru yang siap pakai untuk menghasilkan gambar. Fokus pada gaya pixel art jika prompt awal mengindikasikannya. Kembalikan hanya daftar ide, masing-masing di baris baru, tanpa nomor atau bullet point tambahan. Prompt awal: "${currentPrompt}"`;
+             if (isPixelArtPrompt(currentPrompt)) {
+                variationInstruction = `Berikan 3 sampai 5 ide variasi untuk aset game atau ilustrasi 2D pixel art berdasarkan prompt berikut. Setiap ide harus berupa prompt baru yang siap pakai untuk menghasilkan gambar pixel art yang bersih dan detail. Kembalikan hanya daftar ide, masing-masing di baris baru, tanpa nomor atau bullet point tambahan. Prompt awal: "${currentPrompt}"`;
+            }
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: variationInstruction }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    await handleApiResponseError(response, "Gagal dapatkan ide variasi. ");
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    const suggestionsText = result.candidates[0].content.parts[0].text;
+                    const suggestionsArray = suggestionsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+                    
+                    variationSuggestionsList.innerHTML = ''; 
+                    if (suggestionsArray.length > 0) {
+                        suggestionsArray.forEach(suggestion => {
+                            const li = document.createElement('li');
+                            li.textContent = suggestion; 
+                            li.onclick = () => {
+                                promptInput.value = suggestion;
+                                variationSuggestionsContainer.style.display = 'none'; 
+                                displayInfo(`Prompt diubah menjadi: "${suggestion}". Klik "Buat Gambar".`);
+                            };
+                            variationSuggestionsList.appendChild(li);
+                        });
+                        variationSuggestionsContainer.style.display = 'block';
+                        displayInfo("Berikut beberapa ide variasi. Klik salah satu untuk menggunakannya!");
+                    } else {
+                        displayInfo("Tidak ada ide variasi yang ditemukan untuk prompt ini.");
+                    }
+                } else {
+                    throw new Error("Gagal dapatkan ide variasi. Respons server tidak sesuai harapan.");
+                }
+            } catch (error) {
+                console.error('Error suggesting variations:', error);
+                displayError(error.message || `Terjadi kesalahan saat mencari ide variasi.`);
+            } finally {
+                variationLoadingContainer.style.display = 'none';
+                disableButtons(false);
+                if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                }
+            }
+        });
+
+        suggestPaletteButton.addEventListener('click', async () => {
+            const currentPrompt = promptInput.value.trim();
+            if (!currentPrompt) {
+                displayError("Prompt kosong. Masukkan tema dari prompt untuk mendapatkan saran palet warna.");
+                return;
+            }
+            hideMessagesAndSuggestionContainers();
+            paletteLoadingContainer.style.display = 'block';
+            disableButtons(true);
+
+            const paletteInstruction = `Berikan 5 sampai 7 kode warna heksadesimal (hex codes) yang cocok untuk palet pixel art dengan tema utama dari prompt berikut: "${currentPrompt}". Kembalikan hanya daftar kode hex, masing-masing di baris baru, tanpa teks atau penjelasan tambahan. Contoh format: #RRGGBB. Pastikan kode valid.`;
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: paletteInstruction }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    await handleApiResponseError(response, "Gagal menyarankan palet warna. ");
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    const paletteText = result.candidates[0].content.parts[0].text;
+                    const hexColorRegex = /#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b/g;
+                    const colorCodes = paletteText.match(hexColorRegex) || [];
+                    
+                    colorPaletteList.innerHTML = ''; 
+                    if (colorCodes.length > 0) {
+                        colorCodes.forEach(hexCode => {
+                            const li = document.createElement('li');
+                            li.className = 'color-swatch-item';
+                            const colorBox = document.createElement('div');
+                            colorBox.className = 'color-box';
+                            colorBox.style.backgroundColor = hexCode;
+                            const codeText = document.createElement('span');
+                            codeText.textContent = hexCode;
+                            li.appendChild(colorBox);
+                            li.appendChild(codeText);
+                            li.onclick = () => {
+                                const textArea = document.createElement("textarea");
+                                textArea.value = hexCode;
+                                document.body.appendChild(textArea);
+                                textArea.select();
+                                try {
+                                    document.execCommand('copy');
+                                    displayInfo(`Warna ${hexCode} disalin ke clipboard!`);
+                                } catch (err) {
+                                    displayError('Gagal menyalin warna.');
+                                    console.error('Gagal menyalin teks: ', err);
+                                }
+                                document.body.removeChild(textArea);
+                            };
+                            colorPaletteList.appendChild(li);
+                        });
+                        paletteSuggestionsContainer.style.display = 'block';
+                        displayInfo("Berikut saran palet warna untuk tema Anda.");
+                    } else {
+                        displayInfo("Tidak ada saran palet warna yang valid ditemukan untuk tema ini.");
+                    }
+                } else {
+                    throw new Error("Gagal menyarankan palet warna. Respons server tidak sesuai harapan.");
+                }
+            } catch (error) {
+                console.error('Error suggesting palette:', error);
+                displayError(error.message || `Terjadi kesalahan saat menyarankan palet warna.`);
+            } finally {
+                paletteLoadingContainer.style.display = 'none';
+                disableButtons(false);
+                 if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                }
+            }
+        });
+
+        describeImageButton.addEventListener('click', async () => {
+            if (!lastSuccessfulPrompt) {
+                displayError("Tidak ada prompt dari gambar sebelumnya untuk dideskripsikan. Buat gambar terlebih dahulu.");
+                return;
+            }
+            hideMessagesAndSuggestionContainers();
+            descriptionLoadingContainer.style.display = 'block';
+            disableButtons(true);
+
+            const descriptionInstruction = `Berdasarkan prompt gambar berikut, buatlah deskripsi singkat dan menarik (sekitar 1-2 kalimat) yang cocok untuk alt text atau sebagai inspirasi cerita: "${lastSuccessfulPrompt}"`;
+            
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: descriptionInstruction }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    await handleApiResponseError(response, "Gagal membuat deskripsi gambar. ");
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    imageDescriptionText.textContent = result.candidates[0].content.parts[0].text.trim();
+                    imageDescriptionContainer.style.display = 'block';
+                    displayInfo("Deskripsi gambar berhasil dibuat!");
+                } else {
+                    throw new Error("Gagal membuat deskripsi gambar. Respons server tidak sesuai harapan.");
+                }
+            } catch (error) {
+                console.error('Error describing image:', error);
+                displayError(error.message || `Terjadi kesalahan saat membuat deskripsi gambar.`);
+            } finally {
+                descriptionLoadingContainer.style.display = 'none';
+                disableButtons(false);
+                if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                }
+            }
+        });
+
+        createBackstoryButton.addEventListener('click', async () => {
+            if (!lastSuccessfulPrompt) {
+                displayError("Tidak ada prompt dari gambar sebelumnya untuk membuat latar cerita. Buat gambar terlebih dahulu.");
+                return;
+            }
+            hideMessagesAndSuggestionContainers();
+            backstoryLoadingContainer.style.display = 'block';
+            disableButtons(true);
+
+            const backstoryInstruction = `Berdasarkan prompt gambar berikut, ciptakan latar cerita atau lore singkat yang evokatif (sekitar 2-3 kalimat) yang cocok untuk aset game atau ilustrasi: "${lastSuccessfulPrompt}"`;
+            
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: backstoryInstruction }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    await handleApiResponseError(response, "Gagal menciptakan latar cerita. ");
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    backstoryText.textContent = result.candidates[0].content.parts[0].text.trim();
+                    backstoryContainer.style.display = 'block';
+                    displayInfo("Latar cerita berhasil diciptakan!");
+                } else {
+                    throw new Error("Gagal menciptakan latar cerita. Respons server tidak sesuai harapan.");
+                }
+            } catch (error) {
+                console.error('Error creating backstory:', error);
+                displayError(error.message || `Terjadi kesalahan saat menciptakan latar cerita.`);
+            } finally {
+                backstoryLoadingContainer.style.display = 'none';
+                disableButtons(false);
+                if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                }
+            }
+        });
+
+
+        generateButton.addEventListener('click', async () => {
+            let originalPrompt = promptInput.value.trim();
+            if (!originalPrompt) {
+                displayError("Prompt kosong. Masukkan prompt untuk menghasilkan gambar.");
+                return;
+            }
+
+            hideMessagesAndSuggestionContainers();
+            generatedImage.src = `https://placehold.co/600x400/6B7093/F4F1DE?text=Menghasilkan+Gambar...&font=pressstart2p`;
+            generatedImage.alt = "Menghasilkan gambar...";
+            generatedImageContainer.classList.add('items-center', 'justify-center');
+            loadingContainer.style.display = 'block';
+            disableButtons(true); 
+
+
+            let finalPrompt = originalPrompt;
+            
+            if (isPixelArtPrompt(originalPrompt)) {
+                const pixelArtAdditions = ["pixel art", "clean lines", "crisp pixels", "detailed", "no anti-aliasing", "pixel-perfect", "sharp details", "defined pixels"];
+                pixelArtAdditions.forEach(addition => {
+                    if (!finalPrompt.toLowerCase().includes(addition)) finalPrompt += `, ${addition}`;
+                });
+                if (!finalPrompt.toLowerCase().startsWith("pixel art") && !finalPrompt.toLowerCase().includes("pixel art style")) {
+                    finalPrompt = "Pixel art, " + finalPrompt;
+                }
+            }
+
+            try {
+                const payload = { instances: { prompt: finalPrompt }, parameters: { "sampleCount": 1 } };
+                const apiKey = ""; 
+                if (apiKey !== "") {
+                    console.warn("PERINGATAN DIAGNOSTIK: Kunci API Imagen TIDAK kosong sebelum panggilan fetch. Ini mungkin mengganggu injeksi kunci oleh lingkungan. Nilai saat ini:", `'${apiKey}'`);
+                } else {
+                    console.log('Kunci API Imagen dikonfirmasi kosong sebelum panggilan fetch, mengandalkan injeksi lingkungan.');
+                }
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errorContentForUser = "Gagal membaca respons error dari server."; 
+                    let rawErrorForConsole = "Gagal membaca respons error mentah dari server."; 
+
+                    try {
+                        const tempErrorContent = await response.text();
+                        rawErrorForConsole = tempErrorContent; 
+                        
+                        if (tempErrorContent === null || typeof tempErrorContent === 'undefined') {
+                            errorContentForUser = "Respons error dari server adalah null atau undefined.";
+                        } else if (tempErrorContent.trim() === "") { 
+                             errorContentForUser = "Respons error dari server kosong."; 
+                        } else {
+                            errorContentForUser = tempErrorContent; 
+                        }
+                    } catch (e) {
+                        console.error("Gagal membaca teks dari respons error Imagen:", e);
+                    }
+                    
+                    console.log("RAW_IMAGEN_API_ERROR_CONTENT:", rawErrorForConsole); 
+
+                    let apiDetailMessage = errorContentForUser; 
+                    
+                    if (errorContentForUser !== "Respons error dari server kosong." &&
+                        errorContentForUser !== "Respons error dari server adalah null atau undefined." &&
+                        errorContentForUser !== "Gagal membaca respons error dari server." &&
+                        errorContentForUser.length > 250) {
+                        apiDetailMessage = errorContentForUser.substring(0, 250) + "...";
+                    }
+                    
+                    if (errorContentForUser !== "Respons error dari server kosong." &&
+                        errorContentForUser !== "Respons error dari server adalah null atau undefined." &&
+                        errorContentForUser !== "Gagal membaca respons error dari server.") {
+                        try {
+                            const errorJson = JSON.parse(errorContentForUser); 
+                            if (errorJson && errorJson.error && errorJson.error.message) {
+                                apiDetailMessage = errorJson.error.message;
+                            } else if (errorJson && errorJson.message) {
+                                 apiDetailMessage = errorJson.message;
+                            } else if (typeof errorJson === 'object' && errorJson !== null) {
+                                const stringifiedJson = JSON.stringify(errorJson);
+                                if (stringifiedJson !== '{}' && stringifiedJson.trim() !== "") {
+                                    apiDetailMessage = stringifiedJson.substring(0, 250) + (stringifiedJson.length > 250 ? "..." : "");
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Gagal mem-parsing respons error Imagen sebagai JSON. Menggunakan teks mentah. Detail: " + e.message);
+                        }
+                    }
+                    
+                    let userMessage;
+                    const statusText = response.statusText || "Status tidak diketahui";
+                    if (response.status === 401) {
+                        userMessage = `Error ${response.status}: Akses Ditolak (Imagen). Kemungkinan masalah dengan Kunci API atau otorisasi. Detail Server: ${apiDetailMessage}`;
+                    } else if (response.status === 403) {
+                         userMessage = `Error ${response.status}: Akses Dilarang (Imagen). Anda mungkin tidak memiliki izin. Detail Server: ${apiDetailMessage}`;
+                    } else {
+                        userMessage = `Permintaan pembuatan gambar gagal (${response.status} ${statusText}). Detail Server: ${apiDetailMessage}`;
+                    }
+                    throw new Error(userMessage);
+                }
+                
+                const result = await response.json(); 
+                if (result.predictions && result.predictions[0]?.bytesBase64Encoded) {
+                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    generatedImage.src = imageUrl;
+                    generatedImage.alt = originalPrompt; 
+                    lastSuccessfulPrompt = originalPrompt; 
+                    generatedImageContainer.classList.remove('items-center', 'justify-center');
+                    downloadButton.disabled = false; 
+                    downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false;
+                    describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false;
+                    createBackstoryButton.classList.remove('opacity-70');
+                } else {
+                    lastSuccessfulPrompt = ""; 
+                    throw new Error("Gagal hasilkan gambar. Respons server tidak sesuai harapan atau tidak ada prediksi.");
+                }
+            } catch (error) {
+                console.error('Error generating image:', error); 
+                displayError(error.message || `Terjadi kesalahan saat menghasilkan gambar.`);
+                generatedImage.src = `https://placehold.co/600x400/F28482/3D405B?text=ERROR!&font=pressstart2p`;
+                generatedImage.alt = "Error menghasilkan gambar";
+                generatedImageContainer.classList.add('items-center', 'justify-center'); 
+                lastSuccessfulPrompt = ""; 
+                downloadButton.disabled = true; 
+                downloadButton.classList.add('opacity-70');
+                describeImageButton.disabled = true;
+                describeImageButton.classList.add('opacity-70');
+                createBackstoryButton.disabled = true;
+                createBackstoryButton.classList.add('opacity-70');
+            } finally {
+                loadingContainer.style.display = 'none';
+                disableButtons(false); 
+                if (generatedImage.src && !generatedImage.src.startsWith('https://placehold.co')) {
+                    downloadButton.disabled = false; downloadButton.classList.remove('opacity-70');
+                    describeImageButton.disabled = false; describeImageButton.classList.remove('opacity-70');
+                    createBackstoryButton.disabled = false; createBackstoryButton.classList.remove('opacity-70');
+                } else {
+                    downloadButton.disabled = true; downloadButton.classList.add('opacity-70');
+                    describeImageButton.disabled = true; describeImageButton.classList.add('opacity-70');
+                    createBackstoryButton.disabled = true; createBackstoryButton.classList.add('opacity-70');
+                }
+            }
+        });
+
+        downloadButton.addEventListener('click', () => {
+            const imageSrc = generatedImage.src;
+            if (imageSrc && !imageSrc.startsWith('https://placehold.co')) { 
+                const link = document.createElement('a');
+                link.href = imageSrc;
+                
+                let filename = "pixel_art_generated.png";
+                const currentPrompt = promptInput.value.trim();
+                if (currentPrompt) {
+                    filename = currentPrompt.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').substring(0,50) + ".png";
+                    if (filename.length <= 4) { 
+                        filename = "pixel_art_generated.png";
+                    }
+                }
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                displayInfo("Gambar sedang diunduh!");
+            } else {
+                displayError("Tidak ada gambar untuk diunduh atau gambar masih placeholder.");
+            }
+        });
+
+        // Automatically trigger image generation on load if prompt is pre-filled
+        if (promptInput.value) {
+             setTimeout(() => generateButton.click(), 100); 
+        }
+    </script>
+</body>
+</html>
