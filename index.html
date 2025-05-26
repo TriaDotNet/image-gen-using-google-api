@@ -537,7 +537,10 @@
             try {
                 let chatHistory = [{ role: "user", parts: [{ text: enhancementInstruction }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = ""; 
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid.
+                // Anda bisa mendapatkan kunci API dari Google AI Studio atau Google Cloud Console.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -594,7 +597,9 @@
             try {
                 let chatHistory = [{ role: "user", parts: [{ text: variationInstruction }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -661,7 +666,9 @@
             try {
                 let chatHistory = [{ role: "user", parts: [{ text: paletteInstruction }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -744,7 +751,9 @@
             try {
                 let chatHistory = [{ role: "user", parts: [{ text: descriptionInstruction }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -792,7 +801,9 @@
             try {
                 let chatHistory = [{ role: "user", parts: [{ text: backstoryInstruction }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -856,11 +867,11 @@
 
             try {
                 const payload = { instances: { prompt: finalPrompt }, parameters: { "sampleCount": 1 } };
-                const apiKey = ""; 
-                if (apiKey !== "") {
-                    console.warn("PERINGATAN DIAGNOSTIK: Kunci API Imagen TIDAK kosong sebelum panggilan fetch. Ini mungkin mengganggu injeksi kunci oleh lingkungan. Nilai saat ini:", `'${apiKey}'`);
-                } else {
-                    console.log('Kunci API Imagen dikonfirmasi kosong sebelum panggilan fetch, mengandalkan injeksi lingkungan.');
+                // PENTING UNTUK HOSTING DI LUAR LINGKUNGAN CANVAS (misalnya GitHub Pages):
+                // Ganti string kosong di bawah ini dengan Kunci API Google Generative Language Anda yang valid untuk Imagen.
+                const apiKey = ""; // <-- MASUKKAN KUNCI API ANDA DI SINI JIKA HOSTING SENDIRI
+                if (apiKey === "") {
+                    console.warn("PERINGATAN: Kunci API Imagen kosong. Panggilan API kemungkinan akan gagal jika dihosting di luar lingkungan Canvas.");
                 }
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
